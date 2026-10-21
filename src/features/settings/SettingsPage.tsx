@@ -6,9 +6,11 @@ import { Avatar } from '../../components/Avatar';
 import { PageHeader } from '../../components/PageHeader';
 import { Button } from '../../components/Button';
 import { Dialog } from '../../components/Dialog';
+import { useAccess } from '../../app/AccessContext';
 
 export default function SettingsPage() {
   const { state, dispatch, notify } = useApp();
+  const { account } = useAccess();
   const { startTour } = useOutletContext<{ startTour: () => void }>();
   const [confirmReset, setConfirmReset] = useState(false);
   const navigate = useNavigate();
@@ -22,10 +24,15 @@ export default function SettingsPage() {
         <section className="panel">
           <h2>Perfil del jugador</h2>
           <div className="person-header profile-header">
-            <Avatar large />
+            <Avatar
+              large
+              friend={{ initials: account?.initials ?? 'RG', color: 'amber', online: false }}
+            />
             <div>
-              <h3>Roberto García</h3>
-              <small>RobertoGG#1024 · Cuenta demo</small>
+              <h3>{account?.name}</h3>
+              <small>
+                {account?.email} · {account?.role === 'admin' ? 'Administrador' : 'Usuario normal'}
+              </small>
             </div>
           </div>
           <label className="field">
@@ -87,7 +94,8 @@ export default function SettingsPage() {
           <hr />
           <h3>Volver al punto de partida</h3>
           <p className="body-copy muted">
-            Restaura colección, recomendaciones, agentes, pedidos, conexiones y mensajes.
+            Restaura colección, recomendaciones, agentes, pedidos, conexiones y mensajes de esta
+            cuenta. Los ajustes generales del administrador se conservan.
           </p>
           <Button variant="ghost" onClick={() => setConfirmReset(true)}>
             <RefreshCw size={15} />
@@ -101,8 +109,8 @@ export default function SettingsPage() {
         onClose={() => setConfirmReset(false)}
       >
         <p>
-          Se restaurarán todos los datos iniciales de esta demo en tu navegador. Los mensajes y
-          pedidos ficticios se eliminarán.
+          Se restaurarán los datos iniciales de tu cuenta en este navegador. Tus mensajes y pedidos
+          ficticios se eliminarán. La otra cuenta y los ajustes de administración se conservan.
         </p>
         <div className="button-row">
           <Button variant="ghost" onClick={() => setConfirmReset(false)}>

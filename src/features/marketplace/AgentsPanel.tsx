@@ -4,9 +4,11 @@ import { Button } from '../../components/Button';
 import { EmptyState } from '../../components/EmptyState';
 import { getGame } from '../../data/games';
 import { formatMoney } from '../../lib/format';
+import { useAccess } from '../../app/AccessContext';
 
 export function AgentsPanel({ onCreate }: { onCreate: () => void }) {
   const { state, dispatch, notify } = useApp();
+  const { settings } = useAccess();
   const active = state.rules.some((rule) => rule.active);
   return (
     <div className="two-columns">
@@ -19,7 +21,7 @@ export function AgentsPanel({ onCreate }: { onCreate: () => void }) {
           <Button
             variant="primary"
             size="small"
-            disabled={!active}
+            disabled={!active || !settings.simulationsEnabled}
             onClick={() => {
               dispatch({
                 type: 'market/simulate',

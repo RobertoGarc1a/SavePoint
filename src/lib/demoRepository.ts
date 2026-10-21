@@ -11,12 +11,16 @@ export interface DemoRepository {
 }
 
 /** Persistence boundary. Components never read browser storage directly. */
-export function createDemoRepository(storage: StoragePort | null): DemoRepository {
+export function createDemoRepository(
+  storage: StoragePort | null,
+  accountId = 'user',
+): DemoRepository {
+  const key = accountId === 'user' ? STORAGE_KEY : `${STORAGE_KEY}:${accountId}`;
   return {
     load() {
       try {
         if (!storage) throw new Error('Storage unavailable');
-        const value = storage.getItem(STORAGE_KEY);
+        const value = storage.getItem(key);
         if (!value) return { state: createInitialState(), warning: null };
         const result = appStateSchema.safeParse(JSON.parse(value));
         if (!result.success)
@@ -35,7 +39,7 @@ export function createDemoRepository(storage: StoragePort | null): DemoRepositor
     save(state) {
       try {
         if (!storage) return false;
-        storage.setItem(STORAGE_KEY, JSON.stringify(state));
+        storage.setItem(key, JSON.stringify(state));
         return true;
       } catch {
         return false;
@@ -44,10 +48,10 @@ export function createDemoRepository(storage: StoragePort | null): DemoRepositor
   };
 }
 
-export function browserRepository(): DemoRepository {
+export function browserRepository(accountId = 'user'): DemoRepository {
   try {
-    return createDemoRepository(window.localStorage);
+    return createDemoRepository(window.localStorage, accountId);
   } catch {
-    return createDemoRepository(null);
+    return createDemoRepository(null, accountId);
   }
 }

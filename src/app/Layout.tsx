@@ -8,9 +8,11 @@ import {
   Home,
   Inbox,
   Link2,
+  LogOut,
   Menu,
   Search,
   Settings,
+  ShieldCheck,
   ShoppingBag,
   Sparkles,
   Users,
@@ -20,6 +22,7 @@ import { useApp } from './AppContext';
 import { Avatar } from '../components/Avatar';
 import { Tour } from './Tour';
 import { activeFriends } from '../domain/social';
+import { useAccess } from './AccessContext';
 
 const primary = [
   { to: '/', label: 'Mi espacio', icon: Home },
@@ -35,6 +38,7 @@ const collection = [
 ];
 export function Layout() {
   const { state } = useApp();
+  const { account, settings, logout } = useAccess();
   const [menuOpen, setMenuOpen] = useState(false);
   const [tour, setTour] = useState(false);
   const [query, setQuery] = useState('');
@@ -43,9 +47,12 @@ export function Layout() {
   const navigate = useNavigate();
   const online = activeFriends(state).filter((friend) => friend.online).length;
   const currentTitle =
-    [...primary, ...collection, { to: '/settings', label: 'Configuración' }].find(
-      (item) => item.to === location.pathname,
-    )?.label ?? 'Ficha de juego';
+    [
+      ...primary,
+      ...collection,
+      { to: '/settings', label: 'Configuración' },
+      { to: '/admin', label: 'Administración' },
+    ].find((item) => item.to === location.pathname)?.label ?? 'Ficha de juego';
 
   useEffect(() => {
     document.title = `SavePoint — ${currentTitle}`;
@@ -111,6 +118,14 @@ export function Layout() {
               {to === '/wishlist' && <span className="nav-count">{state.wishlist.length}</span>}
             </NavLink>
           ))}
+          {account?.role === 'admin' && (
+            <>
+              <p className="nav-label">CONTROL DE LA PLATAFORMA</p>
+              <NavLink to="/admin" className="nav-item" onClick={() => setMenuOpen(false)}>
+                <ShieldCheck size={19} /> Administración
+              </NavLink>
+            </>
+          )}
         </nav>
         <div className="sidebar-bottom">
           <div className="sidebar-promo">
@@ -132,12 +147,23 @@ export function Layout() {
             Configuración
           </NavLink>
           <Link to="/settings" className="sidebar-user">
-            <Avatar />
+            <Avatar
+              friend={{ initials: account?.initials ?? 'RG', color: 'amber', online: false }}
+            />
             <div>
-              <strong>Roberto García</strong>
-              <small>RobertoGG#1024</small>
+              <strong>{account?.name}</strong>
+              <small>{account?.role === 'admin' ? 'Administrador' : 'Usuario normal'} · Demo</small>
             </div>
           </Link>
+          <button
+            className="nav-item logout-button"
+            onClick={() => {
+              logout();
+              void navigate('/login', { replace: true });
+            }}
+          >
+            <LogOut size={17} /> Cerrar sesión
+          </button>
         </div>
       </aside>
       <div className="app-shell">
@@ -182,6 +208,15 @@ export function Layout() {
           </div>
         </header>
         <main id="main-content" className="main-content" tabIndex={-1}>
+          {settings.announcement && (
+            <div className="banner platform-announcement" role="status">
+              <Bell size={20} />
+              <div>
+                <strong>Aviso de la plataforma</strong>
+                <p>{settings.announcement}</p>
+              </div>
+            </div>
+          )}
           <Suspense
             fallback={
               <p role="status" className="route-loading">

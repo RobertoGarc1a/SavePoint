@@ -11,6 +11,7 @@ import { AgentsPanel } from './AgentsPanel';
 import { OffersPanel } from './OffersPanel';
 import { OrdersPanel } from './OrdersPanel';
 import { SellerPanel } from './SellerPanel';
+import { useAccess } from '../../app/AccessContext';
 
 const tabs = [
   { id: 'offers', label: 'Ofertas' },
@@ -19,10 +20,14 @@ const tabs = [
   { id: 'seller', label: 'Panel del distribuidor' },
 ] as const;
 export default function MarketplacePage() {
+  const { account, settings } = useAccess();
+  const visibleTabs = tabs.filter(
+    (candidate) => candidate.id !== 'seller' || account?.role === 'admin',
+  );
   const [params, setParams] = useSearchParams();
   const requestedGame = games.find((game) => game.id === params.get('game'))?.id;
   const [editing, setEditing] = useState<GameId | null>(null);
-  const tab = tabs.find((candidate) => candidate.id === params.get('tab'))?.id ?? 'offers';
+  const tab = visibleTabs.find((candidate) => candidate.id === params.get('tab'))?.id ?? 'offers';
   const selected = editing ?? requestedGame ?? null;
   const close = () => {
     setEditing(null);
@@ -53,8 +58,14 @@ export default function MarketplacePage() {
         </div>
         <span className="pill">Marketplace demo</span>
       </div>
+      {!settings.simulationsEnabled && (
+        <p className="notice" role="status">
+          El administrador ha pausado las simulaciones de compra. Puedes seguir consultando ofertas,
+          agentes y pedidos.
+        </p>
+      )}
       <div className="tabs">
-        {tabs.map(({ id, label }) => (
+        {visibleTabs.map(({ id, label }) => (
           <button
             key={id}
             className={`tab ${tab === id ? 'active' : ''}`}

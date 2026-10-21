@@ -2,6 +2,7 @@ import { lazy } from 'react';
 import { Link } from 'react-router-dom';
 import { Layout } from './Layout';
 import { EmptyState } from '../components/EmptyState';
+import { MarketplaceAccess, RequireAdmin, RequireSession } from './AccessGuards';
 
 const DashboardPage = lazy(() => import('../features/dashboard/DashboardPage'));
 const LibraryPage = lazy(() => import('../features/library/LibraryPage'));
@@ -12,10 +13,17 @@ const RecommendationsPage = lazy(() => import('../features/social/Recommendation
 const MarketplacePage = lazy(() => import('../features/marketplace/MarketplacePage'));
 const PlatformsPage = lazy(() => import('../features/settings/PlatformsPage'));
 const SettingsPage = lazy(() => import('../features/settings/SettingsPage'));
+const LoginPage = lazy(() => import('../features/auth/LoginPage'));
+const AdminPage = lazy(() => import('../features/admin/AdminPage'));
 
 export const routes = [
+  { path: '/login', element: <LoginPage /> },
   {
-    element: <Layout />,
+    element: (
+      <RequireSession>
+        <Layout />
+      </RequireSession>
+    ),
     children: [
       { path: '/', element: <DashboardPage /> },
       { path: '/library', element: <LibraryPage /> },
@@ -24,9 +32,24 @@ export const routes = [
       { path: '/discover', element: <DiscoverPage /> },
       { path: '/friends', element: <FriendsPage /> },
       { path: '/recommendations', element: <RecommendationsPage /> },
-      { path: '/marketplace', element: <MarketplacePage /> },
+      {
+        path: '/marketplace',
+        element: (
+          <MarketplaceAccess>
+            <MarketplacePage />
+          </MarketplaceAccess>
+        ),
+      },
       { path: '/platforms', element: <PlatformsPage /> },
       { path: '/settings', element: <SettingsPage /> },
+      {
+        path: '/admin',
+        element: (
+          <RequireAdmin>
+            <AdminPage />
+          </RequireAdmin>
+        ),
+      },
       {
         path: '*',
         element: (

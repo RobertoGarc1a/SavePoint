@@ -3,20 +3,25 @@ import { useApp } from '../../app/AppContext';
 import { sellerPriceCents } from '../../domain/marketplace';
 import { formatMoney } from '../../lib/format';
 import { Button } from '../../components/Button';
+import { useAccess } from '../../app/AccessContext';
 
 export function SellerPanel() {
   const { state, dispatch, notify } = useApp();
+  const { account } = useAccess();
   const [stock, setStock] = useState(state.seller.stock);
   const [minimum, setMinimum] = useState((state.seller.minimumCents / 100).toFixed(2));
   const cents = Math.round(Number(minimum) * 100);
   const valid = Number.isInteger(cents) && cents >= 50 && cents <= 975;
+  if (account?.role !== 'admin') return null;
   return (
     <div className="two-columns">
       <section className="panel">
         <p className="eyebrow">MACHINE SELLERS · DISTRIBUIDOR DEMO</p>
         <h2>Tu inventario marca el ritmo.</h2>
         <p className="muted body-copy">
-          Simula cómo un distribuidor ajustaría el precio de Portal 2 sin bajar de un umbral.
+          Simula cómo un distribuidor ajustaría el precio de Portal 2 sin bajar de un umbral. Estos
+          valores pertenecen al escenario de la cuenta admin; no modifican el inventario de la otra
+          cuenta.
         </p>
         <form
           onSubmit={(event) => {
