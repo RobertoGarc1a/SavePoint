@@ -1,0 +1,160 @@
+.login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 1fr;
+}
+.login-story {
+  padding: 44px clamp(28px, 5vw, 80px);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 50px;
+  border-right: 1px solid var(--border);
+  background: radial-gradient(ellipse at 5% 65%, #3b512c80, transparent 65%), #192314;
+}
+.login-story .brand {
+  margin: 0;
+}
+.login-intro h1 {
+  font-size: clamp(36px, 4.5vw, 68px);
+  letter-spacing: -2px;
+  margin: 26px 0;
+}
+.login-intro h1 span {
+  color: var(--accent);
+}
+.login-intro > p {
+  max-width: 380px;
+  color: var(--muted);
+  line-height: 1.9;
+}
+.login-features {
+  margin-top: 42px;
+  display: grid;
+  gap: 24px;
+}
+.login-features p {
+  display: flex;
+  gap: 15px;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.8;
+}
+.login-features svg {
+  color: var(--accent);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.login-features strong {
+  display: block;
+  color: var(--text);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+.login-form-panel {
+  width: 100%;
+  max-width: 540px;
+  margin: auto;
+  padding: 48px 40px;
+}
+.login-form-panel h2 {
+  font-size: 32px;
+  margin-top: 13px;
+}
+.login-form-panel form > .button {
+  width: 100%;
+}
+.demo-accounts {
+  margin-top: 32px;
+}
+.demo-accounts h3 {
+  font-size: 13px;
+  color: var(--muted);
+  margin-bottom: 15px;
+}
+.demo-account {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  text-align: left;
+  gap: 14px;
+  padding: 16px;
+  margin-top: 10px;
+  background: #202c18;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+.demo-account:hover {
+  border-color: var(--accent);
+}
+.demo-account > svg {
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.demo-account > svg:last-child {
+  margin-left: auto;
+}
+.demo-account strong,
+.demo-account small {
+  display: block;
+}
+.demo-account strong {
+  font-size: 13px;
+}
+.demo-account small {
+  color: var(--muted);
+  margin-top: 5px;
+  overflow-wrap: anywhere;
+}
+.logout-button {
+  border: 0;
+  background: transparent;
+  width: 100%;
+  margin-top: 10px;
+}
+.platform-announcement p {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+.admin-grid {
+  margin-bottom: 26px;
+}
+.admin-stats .stat strong {
+  font-size: 23px;
+}
+.admin-option span strong,
+.admin-option span small {
+  display: block;
+}
+.admin-option span small {
+  color: var(--muted);
+  margin-top: 7px;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.admin-option {
+  align-items: flex-start;
+  margin: 22px 0;
+}
+@media (max-width: 800px) {
+  .login-page {
+    grid-template-columns: 1fr;
+  }
+  .login-story {
+    padding: 30px;
+    gap: 30px;
+    border-right: 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .login-intro h1 {
+    font-size: 40px;
+    margin: 18px 0;
+  }
+  .login-features,
+  .login-story > .fine-print {
+    display: none;
+  }
+  .login-form-panel {
+    padding: 32px 22px;
+  }
+}

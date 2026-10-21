@@ -22,9 +22,11 @@ import { getGame } from '../../data/games';
 import { visibleCollection } from '../../domain/library';
 import { activeFriends } from '../../domain/social';
 import { useSocialActions } from '../social/useSocialActions';
+import { useAccess } from '../../app/AccessContext';
 
 export default function DashboardPage() {
   const { state, dispatch, notify } = useApp();
+  const { account } = useAccess();
   const { invite } = useSocialActions();
   const online = activeFriends(state).filter((friend) => friend.online);
   const collection = visibleCollection(state);
@@ -40,7 +42,7 @@ export default function DashboardPage() {
       <PageHeader
         title="Tu próxima partida empieza aquí."
         description="Todos tus juegos. Toda tu gente. Un solo lugar."
-        eyebrow={`${date} · Hola, Roberto`}
+        eyebrow={`${date} · Hola, ${account?.name.split(' ')[0] ?? 'jugador'}`}
         actions={
           <label className="context-control">
             <Sparkles size={15} />

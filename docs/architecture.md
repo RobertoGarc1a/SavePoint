@@ -8,7 +8,7 @@
 - **Context + reducer.** Adecuado para el tamaño actual. Las acciones son una unión discriminada; los componentes despachan cambios sin modificar el estado directamente. Los filtros y formularios permanecen como estado local.
 - **Funciones puras para decisiones de negocio.** `domain/library.ts`, `domain/social.ts` y `domain/marketplace.ts` se prueban sin montar React. El simulador recibe identificador de lote y fecha: no obtiene tiempo, aleatoriedad o red por su cuenta.
 - **Zod en la frontera de persistencia.** Se validan versión, importes, fechas, estados y estructura. Un guardado inválido no entra en la UI. Los formularios de agentes comparten validación con el reducer.
-- **Repositorio de demostración.** `lib/demoRepository.ts` es el único acceso a almacenamiento local. Recibe un puerto inyectable para probar fallos de almacenamiento. Un backend real necesitará su propia API asíncrona; esta interfaz síncrona no pretende resolver sincronización remota.
+- **Repositorios de demostración.** `lib/demoRepository.ts` aísla los datos de cada cuenta; `lib/accessRepository.ts` conserva la sesión y los ajustes generales. Reciben puertos inyectables para probar fallos de almacenamiento. Un backend real necesitará su propia API asíncrona; estas interfaces síncronas no pretenden resolver sincronización remota.
 - **CSS por capas.** Tokens de color y tipografía; base; layout; componentes reutilizables; detalles de las pantallas. No depende de estilos generados en JavaScript.
 
 ## Dependencias entre módulos
@@ -25,15 +25,23 @@ La regla del distribuidor para Portal 2 es `max(precioMínimo, 975 - stock * 7)`
 
 Estas comprobaciones sirven para demostrar comportamiento y realizar tests. En una integración comercial, el servidor debe volver a verificar propiedad, presupuesto, stock y permisos y ejecutar la operación de forma atómica e idempotente. El frontend no puede ser la autoridad sobre una compra.
 
+## Acceso y administración de demostración
+
+`AccessProvider` mantiene la cuenta actual y los ajustes generales validados con Zod. Las dos cuentas públicas están definidas en `domain/access.ts`. La sesión guarda solo un identificador conocido en `sessionStorage`; el rol se obtiene del fixture. Al cerrar sesión, se elimina el identificador guardado. Si falla el almacenamiento, se informa y se mantiene el flujo en memoria.
+
+`RequireSession` protege el layout y conserva la ruta solicitada para después del login. `RequireAdmin` bloquea `/admin` al jugador; el enlace y el panel del distribuidor también se restringen por rol. `updateSettings` vuelve a comprobar el rol y el esquema antes de aplicar cambios. El dispatch del estado rechaza acciones sin sesión, cambios de distribuidor del jugador y ejecuciones de mercado cuando están deshabilitadas. Son restricciones de la demo, no una frontera de seguridad: el frontend y sus fixtures se pueden modificar.
+
+`AccountScope` remonta el proveedor de estado al cambiar de cuenta y carga su clave de almacenamiento. Se preserva `savepoint:demo:v2` para el jugador existente, mientras el admin usa una clave separada. Los ajustes compartidos viven fuera de esos estados, por lo que sobreviven a cerrar sesión y a restablecer una cuenta. El stock del distribuidor y las compras son escenarios independientes por cuenta. Los ajustes se recuperan al cambiar de cuenta dentro de la app o al recargar otra pestaña; no existe sincronización multiusuario remota.
+
 ## Pruebas
 
 - Casos de dominio: condiciones que permiten o bloquean compras, duplicados, stock, importes y comparación de plataformas.
 - Persistencia: recuperación de guardados corruptos y degradación cuando el navegador no permite guardar.
 - Reducer: transiciones que cambian propiedad, recomendaciones y restablecimiento.
-- Integración React: formularios, búsquedas, rutas, modo adaptativo, pedidos y mensajes renderizados como texto.
+- Integración React: formularios, búsquedas, rutas, modo adaptativo, pedidos, mensajes renderizados como texto, login, roles, aislamiento de cuentas y ajustes compartidos.
 
 `test/environment.ts` conserva el `AbortController` nativo junto al `Request` de Node para evitar mezclar realms de Node y jsdom durante la navegación de React Router. Esta adaptación se limita al entorno de pruebas.
 
 ## Fuera del alcance actual
 
-Autenticación, autorización multiusuario, sincronización real de cuentas, servicios de catálogo, chat/voz en tiempo real, IA, gestión real de claves y pagos. Tampoco hay pruebas visuales automatizadas en navegador.
+Autenticación y autorización de servidor, sincronización real de cuentas, servicios de catálogo, chat/voz en tiempo real, IA, gestión real de claves y pagos. El login con roles solo representa el flujo de la demo. Tampoco hay pruebas visuales automatizadas en navegador incluidas en CI.

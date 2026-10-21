@@ -2,7 +2,7 @@
 
 Frontend de una plataforma social de videojuegos: biblioteca unificada, descubrimiento, compañeros de juego y marketplace con agentes. Implementado con **React 19, TypeScript y Vite** para poder continuar el proyecto después de la presentación.
 
-La aplicación actual funciona con datos de demostración. No incluye backend, autenticación ni transacciones reales.
+La aplicación actual funciona con datos de demostración. Incluye login simulado con roles de administrador y jugador; no incluye backend, autenticación de servidor ni transacciones reales.
 
 ## Desarrollo
 
@@ -24,6 +24,8 @@ No se necesitan variables de entorno, cuentas de terceros ni claves de API.
 
 ## Qué puedes probar
 
+- Login con validación de credenciales, cierre de sesión y rutas restringidas por rol.
+- Administración: aviso de la plataforma, activación del marketplace y pausa de las simulaciones. Los ajustes se conservan al cambiar de cuenta.
 - Biblioteca: búsqueda, género, plataforma, estado y ordenación. Un título con varias plataformas se muestra una sola vez.
 - Deseos y fichas de juegos, con recomendaciones personales y explicación del grafo de afinidad.
 - Amigos: búsqueda, sugerencias, comparación de bibliotecas y comprobación de compatibilidad para cooperativo.
@@ -32,7 +34,18 @@ No se necesitan variables de entorno, cuentas de terceros ni claves de API.
 - Marketplace: ofertas, reglas de compra, validación de presupuesto, simulación de pedidos y reglas de precio del distribuidor.
 - Plataformas conectadas, preferencias, recorrido guiado y restablecimiento de la demo.
 
-Para presentar: **Configuración → Restablecer demo → Iniciar recorrido guiado**. El agente inicial de Portal 2 permite completar la compra de ejemplo por 1,95 € con «Simular mercado». [Guion de presentación](docs/demo.md).
+Para presentar: entra como **admin**, revisa **Administración**, guarda los ajustes y cierra sesión. Entra como **usuario** y usa **Configuración → Restablecer demo → Iniciar recorrido guiado**. El agente inicial de Portal 2 permite completar la compra de ejemplo por 1,95 € con «Simular mercado». [Guion de presentación](docs/demo.md).
+
+### Cuentas de demostración
+
+| Rol            | Usuario o correo                     | Contraseña    |
+| -------------- | ------------------------------------ | ------------- |
+| Administrador  | `admin` o `admin@savepoint.demo`     | `Admin123!`   |
+| Usuario normal | `usuario` o `usuario@savepoint.demo` | `Usuario123!` |
+
+Las tarjetas del login rellenan las credenciales; pulsa **Entrar a SavePoint** para acceder. El administrador entra en `/admin` y el jugador en su espacio, salvo que hubiera solicitado otra ruta antes de iniciar sesión. Solo el admin ve Administración y el panel del distribuidor. El acceso directo a `/admin` con una cuenta normal muestra un mensaje de acceso restringido.
+
+Estos usuarios y contraseñas son fixtures públicos del frontend. Los permisos ilustran el flujo de la demo y no ofrecen seguridad frente a la modificación del código o del almacenamiento del navegador. Una versión real necesita autenticación y autorización en el servidor.
 
 ## Organización del código
 
@@ -44,6 +57,8 @@ src/
   domain/        Tipos, esquemas y reglas de biblioteca, afinidad social y mercado
   features/      Pantallas y componentes agrupados por funcionalidad
     dashboard/
+    auth/
+    admin/
     library/
     discovery/
     social/
@@ -76,7 +91,9 @@ Las pruebas de interfaz utilizan React Testing Library con un DOM simulado. No s
 
 ## Persistencia y límites de la demo
 
-- El estado se guarda en este navegador, bajo `savepoint:demo:v2`. Si está corrupto, es incompatible o el almacenamiento está bloqueado, se carga un estado inicial y se muestra un aviso.
+- El estado del jugador se guarda en este navegador bajo `savepoint:demo:v2`; el del admin, bajo `savepoint:demo:v2:admin`. Cada cuenta conserva su colección, preferencias, agentes, mensajes, pedidos y stock de prueba. Se conservan los datos existentes del jugador. Si están corruptos, son incompatibles o el almacenamiento está bloqueado, se carga un estado inicial y se muestra un aviso.
+- Los ajustes generales se guardan bajo `savepoint:admin:v1` y se aplican a ambas cuentas al cambiar de sesión o recargar. El restablecimiento de una cuenta no elimina los ajustes generales ni los datos de la otra.
+- La sesión de demo se conserva en `sessionStorage`, bajo `savepoint:session:v1`, hasta cerrar sesión o terminar la sesión del navegador. Solo se guarda el identificador del perfil, sin contraseñas. Si el almacenamiento está bloqueado, se permite trabajar en memoria y se avisa.
 - La versión antigua del prototipo usaba otra clave; no se importa automáticamente a esta estructura.
 - El marketplace trabaja en **céntimos enteros**. Cada regla tiene su presupuesto y permite una unidad. Comprueba precio, región, stock, amigos y propiedad previa. Se pausa tras comprar.
 - «Simular mercado» es una acción explícita: no hay agentes ejecutándose en segundo plano.
